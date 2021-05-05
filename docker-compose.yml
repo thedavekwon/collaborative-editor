@@ -5,24 +5,40 @@ services:
         image: "mongo"
         restart: always
         ports:
-            - 27017:27017
+            - 27017
+        networks:
+            - collab-network
     
     server:
-        depends_on: 
+        depends_on:
             - mongo
-        links:
-            - "mongo"
+                # condition: service_healthy
+        # links:
+        #     - "mongo"
         restart: always
-        build: server
+        image: thedavekwon/collab_server
         ports:
             - 8080:8080
-        
+        environment:
+            - MONGO_ADDR=mongo
+        networks:
+            - collab-network
+            
+            
     client:
         depends_on: 
             - server
-        links:
-            - "server"
+        # links:
+        #     - "server"
         restart: always
-        build: client
+        image: thedavekwon/collab_client
         ports:
-            - 3000:3000
+            - 80:80
+        environment:
+            - SERVER_ADDR=server
+        networks:
+            - collab-network
+      
+networks:
+    collab-network:
+        driver: bridge

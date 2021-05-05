@@ -1,8 +1,8 @@
 const axios = require('axios');
 
 // console.log(window.location.href)
-const server = "127.0.0.1";
-// const server = "server"
+
+const server = process.env.SERVER_ADDR || "127.0.0.1";
 
 export async function createDoc(userId) {
     const url = `http://${server}:8080/doc/create/` + userId;
