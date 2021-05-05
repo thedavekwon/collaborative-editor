@@ -12,17 +12,18 @@ import {
 
 import { getDoc, updateDocTitle } from './util.js';
 
+const server = window.location.hostname;
 Sharedb.types.register(richText.type);
 
 function Editor() {
   let { docId } = useParams();
   console.log(docId);
   // Connecting to our socket server
-  const socket = new WebSocket('ws://127.0.0.1:8080/edit/' + docId);
+  const socket = new WebSocket(`ws://${server}/edit/` + docId);
   const connection = new Sharedb.Connection(socket);
 
   const Http = new XMLHttpRequest();
-  const url = 'http://127.0.0.1:8080/edit/' + docId;
+  const url = `http://${server}:8080/edit/` + docId;
   Http.open("GET", url);
   Http.send();
 

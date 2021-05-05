@@ -6,8 +6,8 @@ var richText = require('rich-text');
 var WebSocket = require('ws');
 var WebSocketJSONStream = require('websocket-json-stream');
 const { MongoClient, ObjectID } = require('mongodb');
-const { title } = require('process');
 
+console.log(process.env);
 const mongo = process.env.MONGO_ADDR || '127.0.0.1'
 const uri = `mongodb://${mongo}:27017/test`
 const client = new MongoClient(uri, {

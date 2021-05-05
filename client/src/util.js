@@ -2,7 +2,10 @@ const axios = require('axios');
 
 // console.log(window.location.href)
 
-const server = process.env.SERVER_ADDR || "127.0.0.1";
+console.log(process.env);
+console.log(window.location.hostname);
+// const server = process.env.REACT_APP_SERVER_ADDR || "127.0.0.1";
+const server = window.location.hostname;
 
 export async function createDoc(userId) {
     const url = `http://${server}:8080/doc/create/` + userId;

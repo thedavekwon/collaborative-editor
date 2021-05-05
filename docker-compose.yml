@@ -4,8 +4,6 @@ services:
     mongo:
         image: "mongo"
         restart: always
-        ports:
-            - 27017
         networks:
             - collab-network
     
@@ -17,9 +15,11 @@ services:
         #     - "mongo"
         restart: always
         image: thedavekwon/collab_server
+        # build: server
         ports:
             - 8080:8080
         environment:
+            - CHOKIDAR_USEPOLLING=true
             - MONGO_ADDR=mongo
         networks:
             - collab-network
@@ -32,10 +32,12 @@ services:
         #     - "server"
         restart: always
         image: thedavekwon/collab_client
+        # build: client
         ports:
             - 80:80
         environment:
-            - SERVER_ADDR=server
+            - CHOKIDAR_USEPOLLING=true
+            - REACT_APP_SERVER_ADDR=server
         networks:
             - collab-network
       
