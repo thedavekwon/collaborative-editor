@@ -1,3 +1,5 @@
+docker context use default
+
 # Build docker containers
 docker build -t thedavekwon/collab_server server
 docker build -t thedavekwon/collab_client client

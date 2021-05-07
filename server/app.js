@@ -22,6 +22,7 @@ var backend = new ShareDB({ db });
 
 var app = express();
 app.use(cors())
+app.options('*', cors());
 app.use(express.static('static'));
 app.use(express.static('node_modules/quill/dist'));
 
@@ -35,6 +36,11 @@ var wss = new WebSocket.Server({ server: server });
 wss.on('connection', function (ws, req) {
   var stream = new WebSocketJSONStream(ws);
   backend.listen(stream);
+});
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
 });
 
 app.get('/edit/:id', function (req, res) {

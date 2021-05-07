@@ -18,6 +18,8 @@ services:
         # build: server
         ports:
             - 8080:8080
+        #   - target: 8080
+        #     x-aws-protocol: http
         environment:
             - CHOKIDAR_USEPOLLING=true
             - MONGO_ADDR=mongo

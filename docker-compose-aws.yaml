@@ -74,12 +74,12 @@ Resources:
       LoadBalancerArn:
         Ref: LoadBalancer
       Port: 80
-      Protocol: TCP
+      Protocol: HTTP
     Type: AWS::ElasticLoadBalancingV2::Listener
   ClientTCP80TargetGroup:
     Properties:
       Port: 80
-      Protocol: TCP
+      Protocol: HTTP
       Tags:
       - Key: com.docker.compose.project
         Value: cctutorial
@@ -172,11 +172,11 @@ Resources:
   Collabnetwork8080Ingress:
     Properties:
       CidrIp: 0.0.0.0/0
-      Description: server:8080/tcp on collab-network network
+      Description: server:8080/ on collab-network network
       FromPort: 8080
       GroupId:
         Ref: CollabnetworkNetwork
-      IpProtocol: TCP
+      IpProtocol: "-1"
       ToPort: 8080
     Type: AWS::EC2::SecurityGroupIngress
   Collabnetwork80Ingress:
@@ -229,10 +229,10 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
   LoadBalancer:
     Properties:
-      LoadBalancerAttributes:
-      - Key: load_balancing.cross_zone.enabled
-        Value: "true"
       Scheme: internet-facing
+      SecurityGroups:
+      - Ref: CollabnetworkNetwork
+      - Ref: DefaultNetwork
       Subnets:
       - subnet-ae57d19f
       - subnet-076e1c61
@@ -243,7 +243,7 @@ Resources:
       Tags:
       - Key: com.docker.compose.project
         Value: cctutorial
-      Type: network
+      Type: application
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
   LogGroup:
     Properties:
@@ -365,9 +365,32 @@ Resources:
       - Key: com.docker.compose.service
         Value: mongo
     Type: AWS::IAM::Role
+  Server8080Listener:
+    Properties:
+      DefaultActions:
+      - ForwardConfig:
+          TargetGroups:
+          - TargetGroupArn:
+              Ref: Server8080TargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8080
+      Protocol: HTTP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  Server8080TargetGroup:
+    Properties:
+      Port: 8080
+      Protocol: HTTP
+      Tags:
+      - Key: com.docker.compose.project
+        Value: cctutorial
+      TargetType: ip
+      VpcId: vpc-0619967b
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
   ServerService:
     DependsOn:
-    - ServerTCP8080Listener
+    - Server8080Listener
     - MongoService
     Properties:
       Cluster:
@@ -385,7 +408,7 @@ Resources:
       - ContainerName: server
         ContainerPort: 8080
         TargetGroupArn:
-          Ref: ServerTCP8080TargetGroup
+          Ref: Server8080TargetGroup
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
@@ -428,29 +451,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-  ServerTCP8080Listener:
-    Properties:
-      DefaultActions:
-      - ForwardConfig:
-          TargetGroups:
-          - TargetGroupArn:
-              Ref: ServerTCP8080TargetGroup
-        Type: forward
-      LoadBalancerArn:
-        Ref: LoadBalancer
-      Port: 8080
-      Protocol: TCP
-    Type: AWS::ElasticLoadBalancingV2::Listener
-  ServerTCP8080TargetGroup:
-    Properties:
-      Port: 8080
-      Protocol: TCP
-      Tags:
-      - Key: com.docker.compose.project
-        Value: cctutorial
-      TargetType: ip
-      VpcId: vpc-0619967b
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
   ServerTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -491,7 +491,6 @@ Resources:
         PortMappings:
         - ContainerPort: 8080
           HostPort: 8080
-          Protocol: tcp
       Cpu: "256"
       ExecutionRoleArn:
         Ref: ServerTaskExecutionRole
