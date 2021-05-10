@@ -6,6 +6,8 @@ services:
         restart: always
         networks:
             - collab-network
+        ports:
+            - 27016:27017
     
     server:
         depends_on:
@@ -14,7 +16,7 @@ services:
         # links:
         #     - "mongo"
         restart: always
-        image: thedavekwon/collab_server
+        image: jampherpo/collab_server
         # build: server
         ports:
             - 8080:8080
@@ -33,13 +35,15 @@ services:
         # links:
         #     - "server"
         restart: always
-        image: thedavekwon/collab_client
+        image: jampherpo/collab_client
         # build: client
         ports:
             - 80:80
         environment:
             - CHOKIDAR_USEPOLLING=true
             - REACT_APP_SERVER_ADDR=server
+            - REACT_APP_USER_POOL_ID=us-east-1_j6cRnJTlJ
+            - REACT_APP_CLIENT_ID=3sffhali9l154i2q8vrbksiodv
         networks:
             - collab-network
       

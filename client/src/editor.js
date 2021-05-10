@@ -79,7 +79,7 @@ function Editor() {
 
   return (
     <Container>
-      <Button><Link to={"/"}>Home</Link></Button>
+      <Button><Link to={"/view"}>Home</Link></Button>
       <Button>Share</Button>
       <div style={{
         'textAlign': 'center',

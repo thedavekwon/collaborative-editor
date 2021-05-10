@@ -1,11 +1,11 @@
 docker context use default
 
 # Build docker containers
-docker build -t thedavekwon/collab_server server
-docker build -t thedavekwon/collab_client client
+docker build -t jampherpo/collab_server server
+docker build -t jampherpo/collab_client client
 
 # Push containers to Docker hub
-docker push thedavekwon/collab_server
-docker push thedavekwon/collab_client
+docker push jampherpo/collab_server
+docker push jampherpo/collab_client
 
 docker-compose build
