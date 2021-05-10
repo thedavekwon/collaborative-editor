@@ -8,4 +8,4 @@ docker build -t jampherpo/collab_client client
 docker push jampherpo/collab_server
 docker push jampherpo/collab_client
 
-docker-compose build
+# docker-compose build

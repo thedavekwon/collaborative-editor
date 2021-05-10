@@ -6,22 +6,16 @@ services:
         restart: always
         networks:
             - collab-network
-        ports:
-            - 27016:27017
     
     server:
         depends_on:
             - mongo
-                # condition: service_healthy
-        # links:
-        #     - "mongo"
         restart: always
         image: jampherpo/collab_server
         # build: server
         ports:
-            - 8080:8080
-        #   - target: 8080
-        #     x-aws-protocol: http
+           - target: 8080
+             x-aws-protocol: http
         environment:
             - CHOKIDAR_USEPOLLING=true
             - MONGO_ADDR=mongo
@@ -32,8 +26,6 @@ services:
     client:
         depends_on: 
             - server
-        # links:
-        #     - "server"
         restart: always
         image: jampherpo/collab_client
         # build: client
@@ -42,11 +34,12 @@ services:
         environment:
             - CHOKIDAR_USEPOLLING=true
             - REACT_APP_SERVER_ADDR=server
-            - REACT_APP_USER_POOL_ID=us-east-1_j6cRnJTlJ
-            - REACT_APP_CLIENT_ID=3sffhali9l154i2q8vrbksiodv
+            # - REACT_APP_USER_POOL_ID=!Ref UserPool 
+            # - REACT_APP_CLIENT_ID=!Ref UserPoolClient
         networks:
             - collab-network
       
 networks:
     collab-network:
         driver: bridge
+
