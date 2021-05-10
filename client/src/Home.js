@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  BrowserRouter as Router,
   Link,
   Redirect
 } from "react-router-dom";
@@ -18,8 +17,7 @@ import Container from '@material-ui/core/Container';
 import { useHistory } from "react-router-dom"
 
 import { createDoc, deleteDoc, getDocList, shareDoc } from './util.js';
-import { handleSignout, getCurrentUser } from './Cognito'
-import { ListItemAvatar } from '@material-ui/core';
+import { getCurrentUser } from './Cognito'
 
 function Copyright() {
   return (
@@ -84,11 +82,10 @@ export function Home() {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(async () => {
-    console.log(data);
     const result = await getDocList(user.id);
     setData({ docs: result.data });
-    console.log(data);
     const loggedInUser = localStorage.getItem("user");
     if (!loggedInUser) {
       <Redirect to='/signin' />
@@ -103,7 +100,7 @@ export function Home() {
           <Typography variant="h6" color="inherit" noWrap>
             Cooper Docs
             </Typography>
-          <Button onClick={() => { history.push("/signin"); }} variant="contained" color="primary">
+          <Button onClick={() => { localStorage.clear(); history.push("/signin");  }} variant="contained" color="primary">
             Sign Out
             </Button>
         </Toolbar>

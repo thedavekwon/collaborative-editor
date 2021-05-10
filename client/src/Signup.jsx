@@ -16,7 +16,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 class Signup extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.changeEmail = this.changeEmail.bind(this)
     this.changeUsername = this.changeUsername.bind(this)
@@ -47,33 +47,33 @@ class Signup extends Component {
   }
 
   whooshHandler = () => {
-    this.setState({ whoosh: true})
+    this.setState({ whoosh: true })
     this.renderRedirect();
   }
 
   renderRedirect = () => {
-    if(this.state.whoosh) {
+    if (this.state.whoosh) {
       return <Redirect to='/signin' />
     }
   }
 
-  changeEmail (e) {
+  changeEmail(e) {
     this.setState({ email: e.target.value })
   }
 
-  changeUsername (e) {
+  changeUsername(e) {
     this.setState({ username: e.target.value })
   }
 
-  changePassword (e) {
+  changePassword(e) {
     this.setState({ password: e.target.value })
   }
 
-  changeVerifyCode (e) {
+  changeVerifyCode(e) {
     this.setState({ verifyCode: e.target.value })
   }
 
-  handleSignupSubmit (e) {
+  handleSignupSubmit(e) {
     const { username, email, password } = this.state
     e.preventDefault()
     console.log('Entered:', this.state)
@@ -82,12 +82,12 @@ class Signup extends Component {
         console.log(err)
         return
       }
-      console.log(result.user)
+      console.log(result)
       this.setState({ showVerification: true })
     })
   }
 
-  handleVerifySubmit (e) {
+  handleVerifySubmit(e) {
     e.preventDefault()
     verifyUser(this.state.username, this.state.verifyCode, (err, result) => {
       if (err) {
@@ -98,77 +98,88 @@ class Signup extends Component {
     })
   }
 
-  render () {
+  render() {
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <div className={this.classes.paper}>
-          <Avatar className={this.classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
+        {
+          !this.state.showVerification ? (<div className={this.classes.paper}>
+            <Avatar className={this.classes.avatar}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Sign Up
           </Typography>
-          <form className={this.classes.form} noValidate onSubmit={this.handleSigninSubmit}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={this.state.email}
-              onChange={this.changeEmail}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={this.state.username}
-              onChange={this.changeUsername}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={this.state.password}
-              onChange={this.changePassword}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={this.classes.submit}
-            >
-              Sign In
+            <form className={this.classes.form} noValidate onSubmit={this.handleSignupSubmit}>
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={this.state.email}
+                onChange={this.changeEmail}
+              />
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Username"
+                name="username"
+                autoComplete="username"
+                autoFocus
+                value={this.state.username}
+                onChange={this.changeUsername}
+              />
+              <TextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={this.state.password}
+                onChange={this.changePassword}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={this.classes.submit}
+              >
+                Sign Up
             </Button>
-            <Grid container>
-              <Grid item>
-                <Link href="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
+              <Grid container>
+                <Grid item>
+                  <Link href="/signin" variant="body2">
+                    {"Already have an account? Sign In"}
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
-          </form>
-        </div>
+            </form>
+          </div>) :
+            <div className={this.classes.paper}>
+              <form onSubmit={this.handleVerifySubmit}>
+                <input
+                  value={this.state.verifyCode}
+                  onChange={this.changeVerifyCode}
+                  placeholder='code' />
+                <button type='submit'>Verify</button>
+              </form>
+            </div>
+        }
         <div>
-        {this.state.redirect ? (<Redirect push to='/view'/>): null}
+          {this.state.redirect ? (<Redirect push to='/view' />) : null}
         </div>
       </Container>
     );
@@ -218,8 +229,8 @@ class Signup extends Component {
     //       )
     //     }
     //   </div>
-      
-      
+
+
     // )
   }
 }

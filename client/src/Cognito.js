@@ -5,11 +5,14 @@ import {
   AuthenticationDetails
 } from 'amazon-cognito-identity-js'
 import { Redirect } from 'react-router'
+import credentials from './cognito-pool-data.json'
 
-const userPool = new CognitoUserPool({
-  "UserPoolId": process.env.REACT_APP_USER_POOL_ID,
-  "ClientId": process.env.REACT_APP_CLIENT_ID
-});
+// const credentials = {
+//   "UserPoolId": process.env.REACT_APP_USER_POOL_ID,
+//   "ClientId": process.env.REACT_APP_CLIENT_ID
+// };
+
+const userPool = new CognitoUserPool(credentials);
 
 export const createUser = (username, email, password, callback) => {
   const attributeList = [
