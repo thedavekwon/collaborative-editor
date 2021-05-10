@@ -23,7 +23,6 @@ class Signin extends Component {
     this.handleSigninSubmit = this.handleSigninSubmit.bind(this)
     this.classes = {
       paper: {
-        marginTop: 10,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -87,7 +86,7 @@ class Signin extends Component {
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <div className={this.classes.paper}>
+        <div className={this.classes.paper} style={{ marginTop: 100 }}>
           <Avatar className={this.classes.avatar}>
             <LockOutlinedIcon />
           </Avatar>

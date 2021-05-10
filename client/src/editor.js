@@ -9,8 +9,13 @@ import { useParams } from 'react-router-dom';
 import {
   Link
 } from "react-router-dom";
-
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Toolbar from '@material-ui/core/Toolbar';
+import AppBar from '@material-ui/core/AppBar';
 import { getDoc, updateDocTitle } from './util.js';
+import Typography from '@material-ui/core/Typography';
+import { useHistory } from "react-router-dom"
+import Box from '@material-ui/core/Box';
 
 const axios = require('axios');
 const server = window.location.hostname;
@@ -27,13 +32,17 @@ function Editor() {
   const url = `http://${server}:8080/edit/` + docId;
   axios.get(url, { crossdomain: true });
 
-  const [data, setData] = useState({ docs: null });
+  const [title, setTitle] = useState(null);
   // Querying for our document
   const doc = connection.get('documents', docId);
-
+  let history = useHistory();
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(async () => {
     const result = await getDoc(docId);
-    setData({ doc: result.data });
+    setTitle(result?.data?.title);
+    console.log(result);
+    console.log(title);
     console.log(result.data);
   }, []);
 
@@ -78,20 +87,40 @@ function Editor() {
   }, []);
 
   return (
-    <Container>
-      <Button><Link to={"/view"}>Home</Link></Button>
-      <Button>Share</Button>
-      <div style={{
-        'textAlign': 'center',
-      }}>
-        <TextField value={data?.doc?.title} onChange={(e) => {
-          updateDocTitle(docId, e.target.value)
-        }} />
-      </div>
-      <div style={{ margin: '5%', border: '1px solid' }}>
-        <div id='editor'></div>
-      </div>
-    </Container>
+    <React.Fragment>
+      <CssBaseline />
+      <AppBar position="relative">
+        <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography style={{ textAlign: "left", alignRight: true }} variant="h6" color="inherit" noWrap>
+            Cooper Docs
+          </Typography>
+          <div>
+            <Button style={{ textAlign: "end", marginLeft: 10, marginRight: 10 }} onClick={() => { history.push("/view"); }} variant="contained" color="secondary">
+              Home
+            </Button>
+            <Button style={{ textAlign: "end", marginLeft: 10, marginRight: 10 }} onClick={() => { localStorage.clear(); history.push("/signin"); }} variant="contained" color="secondary">
+              Sign Out
+            </Button>
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <div style={{
+          'textAlign': 'center',
+          margin: '5%'
+        }}>
+          <Box>
+            <TextField value={title} onChange={(e) => {
+              setTitle(e.target.value);
+              updateDocTitle(docId, e.target.value);
+            }} />
+          </Box>
+        </div>
+        <div style={{ margin: '5%', border: '1px solid' }}>
+          <div id='editor'></div>
+        </div>
+      </Container>
+    </React.Fragment>
   );
 }
 

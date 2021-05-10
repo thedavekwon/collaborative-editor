@@ -42,3 +42,10 @@ export async function shareDoc(userId, docId) {
     const response = await axios.get(url, { crossdomain: true });
     return response;
 }
+
+export async function getUserList() {
+    const url = `http://${server}:8080/user/getlist`;
+    const response = await axios.get(url, { crossdomain: true });
+    console.log(getUserList);
+    return response;
+}

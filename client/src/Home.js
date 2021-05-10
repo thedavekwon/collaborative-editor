@@ -15,8 +15,15 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { useHistory } from "react-router-dom"
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from '@material-ui/core/TextField';
 
-import { createDoc, deleteDoc, getDocList, shareDoc } from './util.js';
+
+import { createDoc, deleteDoc, getDocList, shareDoc, getUserList } from './util.js';
 import { getCurrentUser } from './Cognito'
 
 function Copyright() {
@@ -65,6 +72,23 @@ export function Home() {
   const classes = useStyles();
   const [data, setData] = useState({ docs: [] });
   const [user, setUser] = useState({ id: null });
+  const [open, setOpen] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [shareEmail, setShareEmail] = useState("");
+
+  const handleClickOpen = (doc) => {
+    setOpen(true);
+    setSelectedDoc(doc)
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const changeEmail = (e) => {
+    setShareEmail(e.target.value)
+  }
+
   let history = useHistory()
 
   useEffect(() => {
@@ -96,28 +120,26 @@ export function Home() {
     <React.Fragment>
       <CssBaseline />
       <AppBar position="relative">
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Cooper Docs
+        <Toolbar style={{display:"flex", justifyContent:"space-between"}}>
+          <div style={{display:"flex", alignItems:"stretch"}}>
+            <Typography style={{ textAlign: "left", alignRight: true, marginLeft: 10, marginRight: 20 }} variant="h6" color="inherit">
+              Cooper Docs
             </Typography>
-          <Button onClick={() => { localStorage.clear(); history.push("/signin");  }} variant="contained" color="primary">
-            Sign Out
+            <Typography style={{ textAlign: "left", alignRight: true, marginLeft: 10, marginRight: 10}} variant="h6" color="inherit">
+              {user.id}
+            </Typography>
+          </div>
+          <div>
+            <Button style={{ textAlign: "end", marginLeft: 10, marginRight: 10 }} onClick={() => createDoc(user.id).then(() => getDocList(user.id).then(result => setData({ docs: result.data })))} variant="contained" color="secondary">
+              Create New Document
             </Button>
+            <Button style={{ textAlign: "end",  marginLeft: 10, marginRight: 10 }} onClick={() => { localStorage.clear(); history.push("/signin"); }} variant="contained" color="secondary">
+              Sign Out
+            </Button>
+          </div>
         </Toolbar>
       </AppBar>
       <main>
-        <div className={classes.docContent}>
-          <Container maxWidth="sm">
-            <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>
-              {"Welcome " + user.id}
-            </Typography>
-          </Container>
-        </div>
-        <Container maxWidth="sm">
-          <Button onClick={() => createDoc(user.id).then(() => getDocList(user.id).then(result => setData({ docs: result.data })))} variant="contained" color="primary">
-            Create New Doc
-            </Button>
-        </Container>
         <Container className={classes.cardGrid} maxWidth="md">
           <Grid container spacing={4}>
             {data.docs.map((doc) => (
@@ -129,15 +151,15 @@ export function Home() {
                     </Typography>
                   </CardContent>
                   <CardActions>
-                    <Button size="small" color="primary">
-                      <Link to={"/editor/" + doc._id}>Edit</Link>
+                    <Button size="small" color="primary" onClick={() => { history.push("/editor/" + doc._id)}}>
+                      Edit
                     </Button>
                     <Button onClick={() => deleteDoc(doc._id).then(response => {
                       getDocList(user.id).then(result => setData({ docs: result.data }));
                     })} size="small" color="primary">
                       Delete
                       </Button>
-                    <Button onClick={() => shareDoc("user2", doc._id).then(response => console.log(response))} size="small" color="primary">
+                    <Button onClick={() => { handleClickOpen(doc); }} size="small" color="primary">
                       Share
                       </Button>
                   </CardActions>
@@ -155,6 +177,39 @@ export function Home() {
         <Copyright />
       </footer>
       {/* End footer */}
+      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Share Document</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter other accounts to share document.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Email Address"
+            type="email"
+            fullWidth
+            value={shareEmail}
+            onChange={changeEmail}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={() => {
+            if (shareEmail === "" || selectedDoc == null) return;
+            console.log(shareEmail);
+            console.log(selectedDoc);
+            shareDoc(shareEmail, selectedDoc._id)
+            setShareEmail("");
+            handleClose();
+          }} color="primary">
+            Share
+          </Button>
+        </DialogActions>
+      </Dialog>
     </React.Fragment>
   );
 }

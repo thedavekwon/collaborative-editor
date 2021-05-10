@@ -26,7 +26,7 @@ class Signup extends Component {
     this.handleVerifySubmit = this.handleVerifySubmit.bind(this)
     this.classes = {
       paper: {
-        marginTop: 10,
+        marginTop: 100,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -100,10 +100,10 @@ class Signup extends Component {
 
   render() {
     return (
-      <Container component="main" maxWidth="xs">
+      <Container component="main" maxWidth="xs" >
         <CssBaseline />
         {
-          !this.state.showVerification ? (<div className={this.classes.paper}>
+          !this.state.showVerification ? (<div className={this.classes.paper} style={{marginTop:100}}>
             <Avatar className={this.classes.avatar}>
               <LockOutlinedIcon />
             </Avatar>
@@ -168,7 +168,7 @@ class Signup extends Component {
               </Grid>
             </form>
           </div>) :
-            <div className={this.classes.paper}>
+            <div className={this.classes.paper} style={{ marginTop: 100 }}>
               <form onSubmit={this.handleVerifySubmit}>
                 <input
                   value={this.state.verifyCode}
