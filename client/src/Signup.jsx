@@ -89,7 +89,7 @@ class Signup extends Component {
 
   handleVerifySubmit(e) {
     e.preventDefault()
-    verifyUser(this.state.username, this.state.verifyCode, (err, result) => {
+    verifyUser(this.state.email, this.state.verifyCode, (err, result) => {
       if (err) {
         console.log(err)
         return
