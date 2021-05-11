@@ -6,6 +6,11 @@ services:
     restart: always
     networks:
       - collab-network
+    deploy:
+      resources:
+          limits:
+            cpus: '1.0'
+            memory: 4096M
 
   server:
     depends_on:
@@ -20,7 +25,12 @@ services:
       - MONGO_ADDR=mongo
     networks:
       - collab-network
-
+    deploy:
+      resources:
+          limits:
+            cpus: '1.0'
+            memory: 4096M
+          
   client:
     depends_on:
       - server
@@ -35,7 +45,11 @@ services:
       - REACT_APP_CLIENT_ID=!Ref UserPoolClient
     networks:
       - collab-network
-
+    deploy:
+      resources:
+          limits:
+            cpus: '1.0'
+            memory: 4096M
 networks:
   collab-network:
     driver: bridge

@@ -74,10 +74,10 @@ class Signup extends Component {
   }
 
   handleSignupSubmit(e) {
-    const { username, email, password } = this.state
+    const { email, password } = this.state
     e.preventDefault()
     console.log('Entered:', this.state)
-    createUser(username, email, password, (err, result) => {
+    createUser(email, email, password, (err, result) => {
       if (err) {
         console.log(err)
         return
@@ -123,19 +123,6 @@ class Signup extends Component {
                 autoFocus
                 value={this.state.email}
                 onChange={this.changeEmail}
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="username"
-                label="Username"
-                name="username"
-                autoComplete="username"
-                autoFocus
-                value={this.state.username}
-                onChange={this.changeUsername}
               />
               <TextField
                 variant="outlined"

@@ -93,7 +93,6 @@ export function Home() {
 
   useEffect(() => {
     getCurrentUser(attributes => {
-      console.log(attributes);
       for (let i = 0; i < attributes.length; i++) {
         if (attributes[i].Name === 'email') {
           setUser({ id: attributes[i].Value });

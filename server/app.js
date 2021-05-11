@@ -10,9 +10,12 @@ const { MongoClient, ObjectID } = require('mongodb');
 console.log(process.env);
 const mongo = process.env.MONGO_ADDR || '127.0.0.1'
 const uri = `mongodb://${mongo}:27017/test`
-const client = new MongoClient(uri, {
+let mongodb;
+MongoClient.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+}).then(client => {
+  mongodb = client.db();
 });
 
 ShareDB.types.register(richText.type);
@@ -57,8 +60,7 @@ app.get('/edit/:id', function (req, res) {
 });
 
 app.get('/user/create/:userId', async function (req, res) {
-  await client.connect();
-  const doc = await client.db().collection('user').insertOne({
+  const doc = mongodb.collection('user').insertOne({
     _id: req.params.userId,
   });
   await doc;
@@ -66,8 +68,7 @@ app.get('/user/create/:userId', async function (req, res) {
 });
 
 app.get('/doc/userlist', async function (req, res) {
-  await client.connect();
-  const userList = await client.db().collection('doc').distinct("accessIds");
+  const userList = mongodb.collection('doc').distinct("accessIds");
   const users = [];
   console.log(userList);
   await userList.forEach(user => users.push(user));
@@ -76,8 +77,7 @@ app.get('/doc/userlist', async function (req, res) {
 });
 
 app.get('/doc/create/:userId', async function (req, res) {
-  await client.connect();
-  const doc = await client.db().collection('doc').insertOne({
+  const doc = mongodb.collection('doc').insertOne({
     owner: req.params.userId,
     accessIds: [req.params.userId]
   });
@@ -86,8 +86,7 @@ app.get('/doc/create/:userId', async function (req, res) {
 });
 
 app.get('/doc/share/:userId-:docId', async function (req, res) {
-  await client.connect();
-  const doc = await client.db().collection('doc').updateOne({ _id: new ObjectID(req.params.docId) }, {
+  const doc = mongodb.collection('doc').updateOne({ _id: new ObjectID(req.params.docId) }, {
     $push: { accessIds: req.params.userId }
   });
   await doc;
@@ -95,8 +94,7 @@ app.get('/doc/share/:userId-:docId', async function (req, res) {
 });
 
 app.get('/doc/updatetitle/:docId-:title', async function (req, res) {
-  await client.connect();
-  const doc = await client.db().collection('doc').updateOne({ _id: new ObjectID(req.params.docId) }, {
+  const doc = mongodb.collection('doc').updateOne({ _id: new ObjectID(req.params.docId) }, {
     $set: {
       title: req.params.title
     }
@@ -106,8 +104,7 @@ app.get('/doc/updatetitle/:docId-:title', async function (req, res) {
 });
 
 app.get('/doc/delete/:docId', async function (req, res) {
-  await client.connect();
-  const doc = await client.db().collection('doc').deleteOne({
+  const doc = mongodb.collection('doc').deleteOne({
     _id: new ObjectID(req.params.docId)
   });
   await doc;
@@ -115,20 +112,16 @@ app.get('/doc/delete/:docId', async function (req, res) {
 });
 
 app.get('/doc/getlist/:userId', async function (req, res) {
-  await client.connect();
-  const userDocumentList = await client.db().collection('doc').find(
+  const userDocumentList = mongodb.collection('doc').find(
     { accessIds: req.params.userId }
   );
-  // userDocumentList.forEach(doc => console.log(doc));
-  // res.json(userDocumentList);
   const docs = [];
   await userDocumentList.forEach(doc => docs.push(doc));
   res.send(docs);
 });
 
 app.get('/doc/get/:docId', async function (req, res) {
-  await client.connect();
-  const doc = await client.db().collection('doc').findOne(
+  const doc = mongodb.collection('doc').findOne(
     { _id: new ObjectID(req.params.docId) }
   );
   await doc;
