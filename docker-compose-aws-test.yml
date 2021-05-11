@@ -27,12 +27,12 @@ Resources:
           SecurityGroups:
           - Ref: CollabnetworkNetwork
           Subnets:
-          - subnet-5e7f077f
-          - subnet-6d0b7532
-          - subnet-3b037e5d
-          - subnet-5f2d2012
-          - subnet-0a8a0b3b
-          - subnet-4c695e42
+          - subnet-ae57d19f
+          - subnet-076e1c61
+          - subnet-62552a3d
+          - subnet-c41f1d89
+          - subnet-3513273b
+          - subnet-3b38401a
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -43,7 +43,7 @@ Resources:
           - Arn
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.service
         Value: client
       TaskDefinition:
@@ -82,16 +82,16 @@ Resources:
       Protocol: HTTP
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       TargetType: ip
-      VpcId: vpc-2673fd5b
+      VpcId: vpc-0619967b
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
   ClientTaskDefinition:
     Properties:
       ContainerDefinitions:
       - Command:
         - us-east-1.compute.internal
-        - collaborative-editor.local
+        - cctutorial.local
         Essential: false
         Image: docker/ecs-searchdomain-sidecar:1.0
         LogConfiguration:
@@ -101,7 +101,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: collaborative-editor
+            awslogs-stream-prefix: cctutorial
         Name: Client_ResolvConf_InitContainer
       - DependsOn:
         - Condition: SUCCESS
@@ -111,12 +111,8 @@ Resources:
           Value: "true"
         - Name: REACT_APP_SERVER_ADDR
           Value: server
-        - Name: REACT_APP_USER_POOL_ID
-          Value: !Ref UserPool 
-        - Name: REACT_APP_CLIENT_ID
-          Value: !Ref UserPoolClient
         Essential: true
-        Image: docker.io/thedavekwon/collab_client:latest@sha256:9ce74774ac8d79ad7d2a54afc0d661490ea15cb718b81bd96659b43af4a581e1
+        Image: docker.io/thedavekwon/collab_client:latest@sha256:b0f4b2cf7b447418293cb1fd67e9dab5b9960a7394e401e8162996264cc580fd
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -125,7 +121,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: collaborative-editor
+            awslogs-stream-prefix: cctutorial
         Name: client
         PortMappings:
         - ContainerPort: 80
@@ -134,7 +130,7 @@ Resources:
       Cpu: "256"
       ExecutionRoleArn:
         Ref: ClientTaskExecutionRole
-      Family: collaborative-editor-client
+      Family: cctutorial-client
       Memory: "512"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -156,22 +152,22 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.service
         Value: client
     Type: AWS::IAM::Role
   CloudMap:
     Properties:
-      Description: Service Map for Docker Compose project collaborative-editor
-      Name: collaborative-editor.local
-      Vpc: vpc-2673fd5b
+      Description: Service Map for Docker Compose project cctutorial
+      Name: cctutorial.local
+      Vpc: vpc-0619967b
     Type: AWS::ServiceDiscovery::PrivateDnsNamespace
   Cluster:
     Properties:
-      ClusterName: collaborative-editor
+      ClusterName: cctutorial
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
     Type: AWS::ECS::Cluster
   Collabnetwork8080Ingress:
     Properties:
@@ -195,13 +191,13 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
   CollabnetworkNetwork:
     Properties:
-      GroupDescription: collaborative-editor Security Group for collab-network network
+      GroupDescription: cctutorial Security Group for collab-network network
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.network
-        Value: collaborative-editor_collab-network
-      VpcId: vpc-2673fd5b
+        Value: cctutorial_collab-network
+      VpcId: vpc-0619967b
     Type: AWS::EC2::SecurityGroup
   CollabnetworkNetworkIngress:
     Properties:
@@ -214,13 +210,13 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
   DefaultNetwork:
     Properties:
-      GroupDescription: collaborative-editor Security Group for default network
+      GroupDescription: cctutorial Security Group for default network
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.network
-        Value: collaborative-editor_default
-      VpcId: vpc-2673fd5b
+        Value: cctutorial_default
+      VpcId: vpc-0619967b
     Type: AWS::EC2::SecurityGroup
   DefaultNetworkIngress:
     Properties:
@@ -238,20 +234,20 @@ Resources:
       - Ref: CollabnetworkNetwork
       - Ref: DefaultNetwork
       Subnets:
-      - subnet-5e7f077f
-      - subnet-6d0b7532
-      - subnet-3b037e5d
-      - subnet-5f2d2012
-      - subnet-0a8a0b3b
-      - subnet-4c695e42
+      - subnet-ae57d19f
+      - subnet-076e1c61
+      - subnet-62552a3d
+      - subnet-c41f1d89
+      - subnet-3513273b
+      - subnet-3b38401a
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       Type: application
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
   LogGroup:
     Properties:
-      LogGroupName: /docker-compose/collaborative-editor
+      LogGroupName: /docker-compose/cctutorial
     Type: AWS::Logs::LogGroup
   MongoService:
     Properties:
@@ -272,12 +268,12 @@ Resources:
           SecurityGroups:
           - Ref: CollabnetworkNetwork
           Subnets:
-          - subnet-5e7f077f
-          - subnet-6d0b7532
-          - subnet-3b037e5d
-          - subnet-5f2d2012
-          - subnet-0a8a0b3b
-          - subnet-4c695e42
+          - subnet-ae57d19f
+          - subnet-076e1c61
+          - subnet-62552a3d
+          - subnet-c41f1d89
+          - subnet-3513273b
+          - subnet-3b38401a
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -288,7 +284,7 @@ Resources:
           - Arn
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.service
         Value: mongo
       TaskDefinition:
@@ -313,7 +309,7 @@ Resources:
       ContainerDefinitions:
       - Command:
         - us-east-1.compute.internal
-        - collaborative-editor.local
+        - cctutorial.local
         Essential: false
         Image: docker/ecs-searchdomain-sidecar:1.0
         LogConfiguration:
@@ -323,13 +319,13 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: collaborative-editor
+            awslogs-stream-prefix: cctutorial
         Name: Mongo_ResolvConf_InitContainer
       - DependsOn:
         - Condition: SUCCESS
           ContainerName: Mongo_ResolvConf_InitContainer
         Essential: true
-        Image: docker.io/library/mongo:latest@sha256:0145cc5df5e657154b83fa04b90e48f6f89b608850d0906addfc0d1681a66a1e
+        Image: docker.io/library/mongo:latest@sha256:3cdeb3dfcff5915fa2c8d910b41eba66b8004acc01be366b7bb7876b7a2b2824
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -338,12 +334,12 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: collaborative-editor
+            awslogs-stream-prefix: cctutorial
         Name: mongo
       Cpu: "256"
       ExecutionRoleArn:
         Ref: MongoTaskExecutionRole
-      Family: collaborative-editor-mongo
+      Family: cctutorial-mongo
       Memory: "512"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -365,7 +361,7 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.service
         Value: mongo
     Type: AWS::IAM::Role
@@ -388,9 +384,9 @@ Resources:
       Protocol: HTTP
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       TargetType: ip
-      VpcId: vpc-2673fd5b
+      VpcId: vpc-0619967b
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
   ServerService:
     DependsOn:
@@ -419,12 +415,12 @@ Resources:
           SecurityGroups:
           - Ref: CollabnetworkNetwork
           Subnets:
-          - subnet-5e7f077f
-          - subnet-6d0b7532
-          - subnet-3b037e5d
-          - subnet-5f2d2012
-          - subnet-0a8a0b3b
-          - subnet-4c695e42
+          - subnet-ae57d19f
+          - subnet-076e1c61
+          - subnet-62552a3d
+          - subnet-c41f1d89
+          - subnet-3513273b
+          - subnet-3b38401a
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -435,7 +431,7 @@ Resources:
           - Arn
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.service
         Value: server
       TaskDefinition:
@@ -460,7 +456,7 @@ Resources:
       ContainerDefinitions:
       - Command:
         - us-east-1.compute.internal
-        - collaborative-editor.local
+        - cctutorial.local
         Essential: false
         Image: docker/ecs-searchdomain-sidecar:1.0
         LogConfiguration:
@@ -470,7 +466,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: collaborative-editor
+            awslogs-stream-prefix: cctutorial
         Name: Server_ResolvConf_InitContainer
       - DependsOn:
         - Condition: SUCCESS
@@ -481,7 +477,7 @@ Resources:
         - Name: MONGO_ADDR
           Value: mongo
         Essential: true
-        Image: docker.io/thedavekwon/collab_server:latest@sha256:3ca311dca1f345aa3026932b46c8462cd079deb0fc33288d887b2089b241ddd1
+        Image: docker.io/thedavekwon/collab_server:latest@sha256:7780f55c8588364f8aa267b2ee65076b67c586ece6f76e8d1a915926f9a48202
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -490,7 +486,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: collaborative-editor
+            awslogs-stream-prefix: cctutorial
         Name: server
         PortMappings:
         - ContainerPort: 8080
@@ -498,7 +494,7 @@ Resources:
       Cpu: "256"
       ExecutionRoleArn:
         Ref: ServerTaskExecutionRole
-      Family: collaborative-editor-server
+      Family: cctutorial-server
       Memory: "512"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -520,24 +516,22 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
       Tags:
       - Key: com.docker.compose.project
-        Value: collaborative-editor
+        Value: cctutorial
       - Key: com.docker.compose.service
         Value: server
     Type: AWS::IAM::Role
   UserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-          UsernameAttributes:
-          - email
-          AutoVerifiedAttributes:
-          - email
-      
+    Properties:
+      AutoVerifiedAttributes:
+      - email
+      UsernameAttributes:
+      - email
+    Type: AWS::Cognito::UserPool
   UserPoolClient:
-      Type: "AWS::Cognito::UserPoolClient"
-      Properties:
-          UserPoolId: !Ref UserPool
-          GenerateSecret: false
-          SupportedIdentityProviders:
-          - COGNITO
-          PreventUserExistenceErrors: ENABLED
-  
+    Properties:
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+      SupportedIdentityProviders:
+      - COGNITO
+      UserPoolId: UserPool
+    Type: AWS::Cognito::UserPoolClient

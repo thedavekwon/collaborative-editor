@@ -48,7 +48,7 @@ app.get('/edit/:id', function (req, res) {
   doc.fetch(function (err) {
     if (err) throw err;
     if (doc.type === null) {
-      doc.create([{ insert: 'Hi!' }], 'rich-text');
+      doc.create([], 'rich-text');
       return;
     }
   });
@@ -62,6 +62,16 @@ app.get('/user/create/:userId', async function (req, res) {
   });
   await doc;
   res.json({ output: "created" });
+});
+
+app.get('/doc/userlist', async function (req, res) {
+  await client.connect();
+  const userList = await client.db().collection('doc').distinct("accessIds");
+  const users = [];
+  console.log(userList);
+  await userList.forEach(user => users.push(user));
+  console.log(users);
+  res.send(users);
 });
 
 app.get('/doc/create/:userId', async function (req, res) {
