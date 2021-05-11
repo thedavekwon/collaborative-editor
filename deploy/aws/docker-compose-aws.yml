@@ -43,7 +43,7 @@ Resources:
           - Arn
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.service
         Value: client
       TaskDefinition:
@@ -82,7 +82,7 @@ Resources:
       Protocol: HTTP
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       TargetType: ip
       VpcId: vpc-0619967b
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -91,7 +91,7 @@ Resources:
       ContainerDefinitions:
       - Command:
         - us-east-1.compute.internal
-        - cctutorial.local
+        - aws.local
         Essential: false
         Image: docker/ecs-searchdomain-sidecar:1.0
         LogConfiguration:
@@ -101,7 +101,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: cctutorial
+            awslogs-stream-prefix: aws
         Name: Client_ResolvConf_InitContainer
       - DependsOn:
         - Condition: SUCCESS
@@ -109,8 +109,12 @@ Resources:
         Environment:
         - Name: CHOKIDAR_USEPOLLING
           Value: "true"
+        - Name: REACT_APP_CLIENT_ID
+          Value: !Ref UserPoolClient
         - Name: REACT_APP_SERVER_ADDR
           Value: server
+        - Name: REACT_APP_USER_POOL_ID
+          Value: !Ref UserPool
         Essential: true
         Image: docker.io/thedavekwon/collab_client:latest@sha256:b0f4b2cf7b447418293cb1fd67e9dab5b9960a7394e401e8162996264cc580fd
         LinuxParameters: {}
@@ -121,7 +125,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: cctutorial
+            awslogs-stream-prefix: aws
         Name: client
         PortMappings:
         - ContainerPort: 80
@@ -130,7 +134,7 @@ Resources:
       Cpu: "256"
       ExecutionRoleArn:
         Ref: ClientTaskExecutionRole
-      Family: cctutorial-client
+      Family: aws-client
       Memory: "512"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -152,22 +156,22 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.service
         Value: client
     Type: AWS::IAM::Role
   CloudMap:
     Properties:
-      Description: Service Map for Docker Compose project cctutorial
-      Name: cctutorial.local
+      Description: Service Map for Docker Compose project aws
+      Name: aws.local
       Vpc: vpc-0619967b
     Type: AWS::ServiceDiscovery::PrivateDnsNamespace
   Cluster:
     Properties:
-      ClusterName: cctutorial
+      ClusterName: aws
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
     Type: AWS::ECS::Cluster
   Collabnetwork8080Ingress:
     Properties:
@@ -191,12 +195,12 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
   CollabnetworkNetwork:
     Properties:
-      GroupDescription: cctutorial Security Group for collab-network network
+      GroupDescription: aws Security Group for collab-network network
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.network
-        Value: cctutorial_collab-network
+        Value: aws_collab-network
       VpcId: vpc-0619967b
     Type: AWS::EC2::SecurityGroup
   CollabnetworkNetworkIngress:
@@ -210,12 +214,12 @@ Resources:
     Type: AWS::EC2::SecurityGroupIngress
   DefaultNetwork:
     Properties:
-      GroupDescription: cctutorial Security Group for default network
+      GroupDescription: aws Security Group for default network
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.network
-        Value: cctutorial_default
+        Value: aws_default
       VpcId: vpc-0619967b
     Type: AWS::EC2::SecurityGroup
   DefaultNetworkIngress:
@@ -242,12 +246,12 @@ Resources:
       - subnet-3b38401a
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       Type: application
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
   LogGroup:
     Properties:
-      LogGroupName: /docker-compose/cctutorial
+      LogGroupName: /docker-compose/aws
     Type: AWS::Logs::LogGroup
   MongoService:
     Properties:
@@ -284,7 +288,7 @@ Resources:
           - Arn
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.service
         Value: mongo
       TaskDefinition:
@@ -309,7 +313,7 @@ Resources:
       ContainerDefinitions:
       - Command:
         - us-east-1.compute.internal
-        - cctutorial.local
+        - aws.local
         Essential: false
         Image: docker/ecs-searchdomain-sidecar:1.0
         LogConfiguration:
@@ -319,13 +323,13 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: cctutorial
+            awslogs-stream-prefix: aws
         Name: Mongo_ResolvConf_InitContainer
       - DependsOn:
         - Condition: SUCCESS
           ContainerName: Mongo_ResolvConf_InitContainer
         Essential: true
-        Image: docker.io/library/mongo:latest@sha256:3cdeb3dfcff5915fa2c8d910b41eba66b8004acc01be366b7bb7876b7a2b2824
+        Image: docker.io/library/mongo:latest@sha256:4e80da85d20b2893d480fd3c9f5b56fe24cd15ed0a80cda248574b2bf5489c8d
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -334,12 +338,12 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: cctutorial
+            awslogs-stream-prefix: aws
         Name: mongo
       Cpu: "256"
       ExecutionRoleArn:
         Ref: MongoTaskExecutionRole
-      Family: cctutorial-mongo
+      Family: aws-mongo
       Memory: "512"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -361,7 +365,7 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.service
         Value: mongo
     Type: AWS::IAM::Role
@@ -384,7 +388,7 @@ Resources:
       Protocol: HTTP
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       TargetType: ip
       VpcId: vpc-0619967b
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -431,7 +435,7 @@ Resources:
           - Arn
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.service
         Value: server
       TaskDefinition:
@@ -456,7 +460,7 @@ Resources:
       ContainerDefinitions:
       - Command:
         - us-east-1.compute.internal
-        - cctutorial.local
+        - aws.local
         Essential: false
         Image: docker/ecs-searchdomain-sidecar:1.0
         LogConfiguration:
@@ -466,7 +470,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: cctutorial
+            awslogs-stream-prefix: aws
         Name: Server_ResolvConf_InitContainer
       - DependsOn:
         - Condition: SUCCESS
@@ -486,7 +490,7 @@ Resources:
               Ref: LogGroup
             awslogs-region:
               Ref: AWS::Region
-            awslogs-stream-prefix: cctutorial
+            awslogs-stream-prefix: aws
         Name: server
         PortMappings:
         - ContainerPort: 8080
@@ -494,7 +498,7 @@ Resources:
       Cpu: "256"
       ExecutionRoleArn:
         Ref: ServerTaskExecutionRole
-      Family: cctutorial-server
+      Family: aws-server
       Memory: "512"
       NetworkMode: awsvpc
       RequiresCompatibilities:
@@ -516,7 +520,7 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
       Tags:
       - Key: com.docker.compose.project
-        Value: cctutorial
+        Value: aws
       - Key: com.docker.compose.service
         Value: server
     Type: AWS::IAM::Role
@@ -533,5 +537,5 @@ Resources:
       PreventUserExistenceErrors: ENABLED
       SupportedIdentityProviders:
       - COGNITO
-      UserPoolId: UserPool
+      UserPoolId: !Ref UserPool
     Type: AWS::Cognito::UserPoolClient

@@ -1,23 +1,4 @@
 version: "3"
-
-x-aws-cloudformation:
-  Resources:
-    UserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UsernameAttributes:
-          - email
-        AutoVerifiedAttributes:
-          - email
-
-    UserPoolClient:
-      Type: "AWS::Cognito::UserPoolClient"
-      Properties:
-        UserPoolId: !Ref UserPool
-        GenerateSecret: false
-        SupportedIdentityProviders:
-          - COGNITO
-        PreventUserExistenceErrors: ENABLED
         
 services:
   mongo:
@@ -31,7 +12,6 @@ services:
       - mongo
     restart: always
     image: thedavekwon/collab_server
-    # build: server
     ports:
       - target: 8080
         x-aws-protocol: http
@@ -46,17 +26,35 @@ services:
       - server
     restart: always
     image: thedavekwon/collab_client
-    # build: client
     ports:
       - 80:80
     environment:
       - CHOKIDAR_USEPOLLING=true
       - REACT_APP_SERVER_ADDR=server
-    #   - REACT_APP_USER_POOL_ID: !Ref UserPool
-    #   - REACT_APP_CLIENT_ID: !Ref UserPoolClient
+      - REACT_APP_USER_POOL_ID=!Ref UserPool
+      - REACT_APP_CLIENT_ID=!Ref UserPoolClient
     networks:
       - collab-network
 
 networks:
   collab-network:
     driver: bridge
+
+x-aws-cloudformation:
+  Resources:
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+
+    UserPoolClient:
+      Type: "AWS::Cognito::UserPoolClient"
+      Properties:
+        UserPoolId: '!Ref UserPool'
+        GenerateSecret: false
+        SupportedIdentityProviders:
+          - COGNITO
+        PreventUserExistenceErrors: ENABLED

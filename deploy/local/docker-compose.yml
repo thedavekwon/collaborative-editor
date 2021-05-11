@@ -1,0 +1,40 @@
+version: "3"
+        
+services:
+  mongo:
+    image: "mongo"
+    restart: always
+    networks:
+      - collab-network
+
+  server:
+    depends_on:
+      - mongo
+    restart: always
+    image: thedavekwon/collab_server
+    ports:
+      - 8080:8080
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - MONGO_ADDR=mongo
+    networks:
+      - collab-network
+
+  client:
+    depends_on:
+      - server
+    restart: always
+    image: thedavekwon/collab_client
+    ports:
+      - 80:80
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_SERVER_ADDR=server
+      - REACT_APP_USER_POOL_ID=REACT_APP_USER_POOL_ID
+      - REACT_APP_CLIENT_ID=REACT_APP_CLIENT_ID
+    networks:
+      - collab-network
+
+networks:
+  collab-network:
+    driver: bridge
