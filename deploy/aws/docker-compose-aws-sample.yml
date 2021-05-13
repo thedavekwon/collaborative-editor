@@ -1,0 +1,541 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  ClientService:
+    DependsOn:
+    - ClientTCP80Listener
+    - ServerService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+        - Cluster
+        - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+      - ContainerName: client
+        ContainerPort: 80
+        TargetGroupArn:
+          Ref: ClientTCP80TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: CollabnetworkNetwork
+          Subnets:
+          - subnet-ae57d19f
+          - subnet-076e1c61
+          - subnet-62552a3d
+          - subnet-c41f1d89
+          - subnet-3513273b
+          - subnet-3b38401a
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+      - RegistryArn:
+          Fn::GetAtt:
+          - ClientServiceDiscoveryEntry
+          - Arn
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.service
+        Value: client
+      TaskDefinition:
+        Ref: ClientTaskDefinition
+    Type: AWS::ECS::Service
+  ClientServiceDiscoveryEntry:
+    Properties:
+      Description: '"client" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+        - TTL: 60
+          Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: client
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  ClientTCP80Listener:
+    Properties:
+      DefaultActions:
+      - ForwardConfig:
+          TargetGroups:
+          - TargetGroupArn:
+              Ref: ClientTCP80TargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 80
+      Protocol: HTTP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  ClientTCP80TargetGroup:
+    Properties:
+      Port: 80
+      Protocol: HTTP
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      TargetType: ip
+      VpcId: vpc-0619967b
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ClientTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+      - Command:
+        - us-east-1.compute.internal
+        - aws.local
+        Essential: false
+        Image: docker/ecs-searchdomain-sidecar:1.0
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: aws
+        Name: Client_ResolvConf_InitContainer
+      - DependsOn:
+        - Condition: SUCCESS
+          ContainerName: Client_ResolvConf_InitContainer
+        Environment:
+        - Name: CHOKIDAR_USEPOLLING
+          Value: "true"
+        - Name: REACT_APP_CLIENT_ID
+          Value: !Ref UserPoolClient
+        - Name: REACT_APP_SERVER_ADDR
+          Value: server
+        - Name: REACT_APP_USER_POOL_ID
+          Value: !Ref UserPool
+        Essential: true
+        Image: docker.io/thedavekwon/collab_client:latest@sha256:37be5a45aa85bc64c8f684dba070a8ab2a358f768c73d33b39615cfba281a69b
+        LinuxParameters: {}
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: aws
+        Name: client
+        PortMappings:
+        - ContainerPort: 80
+          HostPort: 80
+          Protocol: tcp
+      Cpu: "1024"
+      ExecutionRoleArn:
+        Ref: ClientTaskExecutionRole
+      Family: aws-client
+      Memory: "4096"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  ClientTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Condition: {}
+          Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.service
+        Value: client
+    Type: AWS::IAM::Role
+  CloudMap:
+    Properties:
+      Description: Service Map for Docker Compose project aws
+      Name: aws.local
+      Vpc: vpc-0619967b
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+  Cluster:
+    Properties:
+      ClusterName: aws
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+    Type: AWS::ECS::Cluster
+  Collabnetwork8080Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: server:8080/ on collab-network network
+      FromPort: 8080
+      GroupId:
+        Ref: CollabnetworkNetwork
+      IpProtocol: "-1"
+      ToPort: 8080
+    Type: AWS::EC2::SecurityGroupIngress
+  Collabnetwork80Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: client:80/tcp on collab-network network
+      FromPort: 80
+      GroupId:
+        Ref: CollabnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 80
+    Type: AWS::EC2::SecurityGroupIngress
+  CollabnetworkNetwork:
+    Properties:
+      GroupDescription: aws Security Group for collab-network network
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.network
+        Value: aws_collab-network
+      VpcId: vpc-0619967b
+    Type: AWS::EC2::SecurityGroup
+  CollabnetworkNetworkIngress:
+    Properties:
+      Description: Allow communication within network collab-network
+      GroupId:
+        Ref: CollabnetworkNetwork
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: CollabnetworkNetwork
+    Type: AWS::EC2::SecurityGroupIngress
+  DefaultNetwork:
+    Properties:
+      GroupDescription: aws Security Group for default network
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.network
+        Value: aws_default
+      VpcId: vpc-0619967b
+    Type: AWS::EC2::SecurityGroup
+  DefaultNetworkIngress:
+    Properties:
+      Description: Allow communication within network default
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: DefaultNetwork
+    Type: AWS::EC2::SecurityGroupIngress
+  LoadBalancer:
+    Properties:
+      Scheme: internet-facing
+      SecurityGroups:
+      - Ref: CollabnetworkNetwork
+      - Ref: DefaultNetwork
+      Subnets:
+      - subnet-ae57d19f
+      - subnet-076e1c61
+      - subnet-62552a3d
+      - subnet-c41f1d89
+      - subnet-3513273b
+      - subnet-3b38401a
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      Type: application
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  LogGroup:
+    Properties:
+      LogGroupName: /docker-compose/aws
+    Type: AWS::Logs::LogGroup
+  MongoService:
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+        - Cluster
+        - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: CollabnetworkNetwork
+          Subnets:
+          - subnet-ae57d19f
+          - subnet-076e1c61
+          - subnet-62552a3d
+          - subnet-c41f1d89
+          - subnet-3513273b
+          - subnet-3b38401a
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+      - RegistryArn:
+          Fn::GetAtt:
+          - MongoServiceDiscoveryEntry
+          - Arn
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.service
+        Value: mongo
+      TaskDefinition:
+        Ref: MongoTaskDefinition
+    Type: AWS::ECS::Service
+  MongoServiceDiscoveryEntry:
+    Properties:
+      Description: '"mongo" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+        - TTL: 60
+          Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: mongo
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  MongoTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+      - Command:
+        - us-east-1.compute.internal
+        - aws.local
+        Essential: false
+        Image: docker/ecs-searchdomain-sidecar:1.0
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: aws
+        Name: Mongo_ResolvConf_InitContainer
+      - DependsOn:
+        - Condition: SUCCESS
+          ContainerName: Mongo_ResolvConf_InitContainer
+        Essential: true
+        Image: docker.io/library/mongo:latest@sha256:401ae88210c708d54873af22df618b46a5f3d2da1c2676d115326b205ec78d3f
+        LinuxParameters: {}
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: aws
+        Name: mongo
+      Cpu: "1024"
+      ExecutionRoleArn:
+        Ref: MongoTaskExecutionRole
+      Family: aws-mongo
+      Memory: "4096"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  MongoTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Condition: {}
+          Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.service
+        Value: mongo
+    Type: AWS::IAM::Role
+  Server8080Listener:
+    Properties:
+      DefaultActions:
+      - ForwardConfig:
+          TargetGroups:
+          - TargetGroupArn:
+              Ref: Server8080TargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8080
+      Protocol: HTTP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  Server8080TargetGroup:
+    Properties:
+      Port: 8080
+      Protocol: HTTP
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      TargetType: ip
+      VpcId: vpc-0619967b
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ServerService:
+    DependsOn:
+    - Server8080Listener
+    - MongoService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+        - Cluster
+        - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+      - ContainerName: server
+        ContainerPort: 8080
+        TargetGroupArn:
+          Ref: Server8080TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+          - Ref: CollabnetworkNetwork
+          Subnets:
+          - subnet-ae57d19f
+          - subnet-076e1c61
+          - subnet-62552a3d
+          - subnet-c41f1d89
+          - subnet-3513273b
+          - subnet-3b38401a
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+      - RegistryArn:
+          Fn::GetAtt:
+          - ServerServiceDiscoveryEntry
+          - Arn
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.service
+        Value: server
+      TaskDefinition:
+        Ref: ServerTaskDefinition
+    Type: AWS::ECS::Service
+  ServerServiceDiscoveryEntry:
+    Properties:
+      Description: '"server" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+        - TTL: 60
+          Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: server
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  ServerTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+      - Command:
+        - us-east-1.compute.internal
+        - aws.local
+        Essential: false
+        Image: docker/ecs-searchdomain-sidecar:1.0
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: aws
+        Name: Server_ResolvConf_InitContainer
+      - DependsOn:
+        - Condition: SUCCESS
+          ContainerName: Server_ResolvConf_InitContainer
+        Environment:
+        - Name: CHOKIDAR_USEPOLLING
+          Value: "true"
+        - Name: MONGO_ADDR
+          Value: mongo
+        Essential: true
+        Image: docker.io/thedavekwon/collab_server:latest@sha256:81dfce180a12e78d0787a0d04955c28bd2ff6efbba6bc103cc8b6bcfc6e1a8b3
+        LinuxParameters: {}
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: aws
+        Name: server
+        PortMappings:
+        - ContainerPort: 8080
+          HostPort: 8080
+      Cpu: "1024"
+      ExecutionRoleArn:
+        Ref: ServerTaskExecutionRole
+      Family: aws-server
+      Memory: "4096"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  ServerTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Condition: {}
+          Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+      - Key: com.docker.compose.project
+        Value: aws
+      - Key: com.docker.compose.service
+        Value: server
+    Type: AWS::IAM::Role
+  UserPool:
+    Properties:
+      AutoVerifiedAttributes:
+      - email
+      UsernameAttributes:
+      - email
+    Type: AWS::Cognito::UserPool
+  UserPoolClient:
+    Properties:
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+      SupportedIdentityProviders:
+      - COGNITO
+      UserPoolId: !Ref UserPool
+    Type: AWS::Cognito::UserPoolClient
