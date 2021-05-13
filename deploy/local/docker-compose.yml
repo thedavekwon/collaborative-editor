@@ -11,7 +11,7 @@ services:
     depends_on:
       - mongo
     restart: always
-    image: thedavekwon/collab_server
+    build: ../../server
     ports:
       - 8080:8080
     environment:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - server
     restart: always
-    image: thedavekwon/collab_client
+    build: ../../client
     ports:
       - 80:80
     environment:
