@@ -30,8 +30,8 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - REACT_APP_SERVER_ADDR=server
-      - REACT_APP_USER_POOL_ID=us-east-1_j6cRnJTlJ
-      - REACT_APP_CLIENT_ID=3sffhali9l154i2q8vrbksiodv
+      - REACT_APP_USER_POOL_ID=REACT_APP_USER_POOL_ID
+      - REACT_APP_CLIENT_ID=REACT_APP_CLIENT_ID
     networks:
       - collab-network
 
