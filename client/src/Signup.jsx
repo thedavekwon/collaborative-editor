@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
+import {withRouter} from 'react-router-dom'
 import { createUser, verifyUser } from './Cognito'
-import { Redirect } from 'react-router'
+import { Redirect, useHistory } from 'react-router'
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -94,7 +95,7 @@ class Signup extends Component {
         console.log(err)
         return
       }
-      alert(result)
+      this.props.history.push("/signin")
     })
   }
 
@@ -165,61 +166,12 @@ class Signup extends Component {
               </form>
             </div>
         }
-        <div>
+        {/* <div>
           {this.state.redirect ? (<Redirect push to='/view' />) : null}
-        </div>
+        </div> */}
       </Container>
     );
-    // return (
-    //   <div className="Signup">
-    //     <h2>Sign Up</h2>
-    //     {
-    //       !this.state.showVerification ? (
-    //         <form onSubmit={this.handleSignupSubmit}>
-    //           <div>
-    //             <input
-    //               value={this.state.email}
-    //               placeholder='Email'
-    //               type='email'
-    //               onChange={this.changeEmail} />
-    //           </div>
-    //           <div>
-    //             <input
-    //               value={this.state.username}
-    //               placeholder='Username'
-    //               onChange={this.changeUsername} />
-    //           </div>
-    //           <div>
-    //             <input
-    //               value={this.state.password}
-    //               placeholder='Password'
-    //               type='password'
-    //               minLength={6}
-    //               onChange={this.changePassword} />
-    //           </div>
-    //           <div>
-    //             <button type='submit'>Sign up</button>
-    //           </div>
-    //           <div>
-    //             <button onClick={this.whooshHandler}>Sign In</button>
-    //             {this.renderRedirect()}
-    //           </div>
-    //         </form>
-    //       ) : (
-    //         <form onSubmit={this.handleVerifySubmit}>
-    //           <input
-    //             value={this.state.verifyCode}
-    //             onChange={this.changeVerifyCode}
-    //             placeholder='code' />
-    //           <button type='submit'>Verify</button>
-    //         </form>
-    //       )
-    //     }
-    //   </div>
-
-
-    // )
   }
 }
 
-export default Signup
+export default withRouter(Signup)
