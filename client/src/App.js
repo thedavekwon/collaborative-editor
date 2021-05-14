@@ -1,21 +1,20 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Redirect,
 } from "react-router-dom";
-import Editor from './editor.js';
-import Signup from './Signup.jsx';
-import Signin from './Signin.jsx';
-import Home from './Home.js';
-
+import Editor from "./editor.js";
+import Signup from "./Signup.jsx";
+import Signin from "./Signin.jsx";
+import Home from "./Home.js";
 
 export default class App extends Component {
   constructor() {
     super();
     this.state = {
-      isUserAuthenticated: false
+      isUserAuthenticated: false,
     };
   }
 
@@ -23,28 +22,31 @@ export default class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route exact path="/" render={() => {
-            return (
-              this.state.isUserAuthenticated ?
-              <Redirect to="/view" /> :
-              <Redirect to="/signin" />
-            )
-          }}
+          <Route
+            exact
+            path="/"
+            render={() => {
+              return this.state.isUserAuthenticated ? (
+                <Redirect to="/view" />
+              ) : (
+                <Redirect to="/signin" />
+              );
+            }}
           />
           <Route exact path="/editor/:docId">
-            <Editor/>
+            <Editor />
           </Route>
           <Route exact path="/view">
-            <Home/>
+            <Home />
           </Route>
           <Route exact path="/signin">
-            <Signin/>
+            <Signin />
           </Route>
           <Route exact path="/signup">
-            <Signup/>
+            <Signup />
           </Route>
         </Switch>
       </Router>
-    )
-  };
+    );
+  }
 }

@@ -1,37 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { Link, Redirect } from "react-router-dom";
+import AppBar from "@material-ui/core/AppBar";
+import Button from "@material-ui/core/Button";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import Grid from "@material-ui/core/Grid";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
+import { useHistory } from "react-router-dom";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import TextField from "@material-ui/core/TextField";
+
 import {
-  Link,
-  Redirect
-} from "react-router-dom";
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import { useHistory } from "react-router-dom"
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import TextField from '@material-ui/core/TextField';
-
-
-import { createDoc, deleteDoc, getDocList, shareDoc, getUserList } from './util.js';
-import { getCurrentUser } from './Cognito'
+  createDoc,
+  deleteDoc,
+  getDocList,
+  shareDoc,
+  getUserList,
+} from "./util.js";
+import { getCurrentUser } from "./Cognito";
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
+      {"Copyright © "}
       {new Date().getFullYear()}
-      {'.'}
+      {"."}
     </Typography>
   );
 }
@@ -52,12 +54,12 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(8),
   },
   card: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
   },
   cardMedia: {
-    paddingTop: '56.25%', // 16:9
+    paddingTop: "56.25%", // 16:9
   },
   cardContent: {
     flexGrow: 1,
@@ -78,7 +80,7 @@ export function Home() {
 
   const handleClickOpen = (doc) => {
     setOpen(true);
-    setSelectedDoc(doc)
+    setSelectedDoc(doc);
   };
 
   const handleClose = () => {
@@ -86,22 +88,22 @@ export function Home() {
   };
 
   const changeEmail = (e) => {
-    setShareEmail(e.target.value)
-  }
+    setShareEmail(e.target.value);
+  };
 
-  let history = useHistory()
+  let history = useHistory();
 
   useEffect(() => {
-    getCurrentUser(attributes => {
+    getCurrentUser((attributes) => {
       for (let i = 0; i < attributes.length; i++) {
-        if (attributes[i].Name === 'email') {
+        if (attributes[i].Name === "email") {
           setUser({ id: attributes[i].Value });
         }
       }
     });
     const loggedInUser = localStorage.getItem("user");
     if (!loggedInUser) {
-      <Redirect to='/signin' />
+      <Redirect to="/signin" />;
     }
   }, []);
 
@@ -111,7 +113,7 @@ export function Home() {
     setData({ docs: result.data });
     const loggedInUser = localStorage.getItem("user");
     if (!loggedInUser) {
-      <Redirect to='/signin' />
+      <Redirect to="/signin" />;
     }
   }, [user.id]);
 
@@ -119,20 +121,57 @@ export function Home() {
     <React.Fragment>
       <CssBaseline />
       <AppBar position="relative">
-        <Toolbar style={{display:"flex", justifyContent:"space-between"}}>
-          <div style={{display:"flex", alignItems:"stretch"}}>
-            <Typography style={{ textAlign: "left", alignRight: true, marginLeft: 10, marginRight: 20 }} variant="h6" color="inherit">
+        <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "stretch" }}>
+            <Typography
+              style={{
+                textAlign: "left",
+                alignRight: true,
+                marginLeft: 10,
+                marginRight: 20,
+              }}
+              variant="h6"
+              color="inherit"
+            >
               Cooper Docs
             </Typography>
-            <Typography style={{ textAlign: "left", alignRight: true, marginLeft: 10, marginRight: 10}} variant="h6" color="inherit">
+            <Typography
+              style={{
+                textAlign: "left",
+                alignRight: true,
+                marginLeft: 10,
+                marginRight: 10,
+              }}
+              variant="h6"
+              color="inherit"
+            >
               {user.id}
             </Typography>
           </div>
           <div>
-            <Button style={{ textAlign: "end", marginLeft: 10, marginRight: 10 }} onClick={() => createDoc(user.id).then(() => getDocList(user.id).then(result => setData({ docs: result.data })))} variant="contained" color="secondary">
+            <Button
+              style={{ textAlign: "end", marginLeft: 10, marginRight: 10 }}
+              onClick={() =>
+                createDoc(user.id).then(() =>
+                  getDocList(user.id).then((result) =>
+                    setData({ docs: result.data })
+                  )
+                )
+              }
+              variant="contained"
+              color="secondary"
+            >
               Create New Document
             </Button>
-            <Button style={{ textAlign: "end",  marginLeft: 10, marginRight: 10 }} onClick={() => { localStorage.clear(); history.push("/signin"); }} variant="contained" color="secondary">
+            <Button
+              style={{ textAlign: "end", marginLeft: 10, marginRight: 10 }}
+              onClick={() => {
+                localStorage.clear();
+                history.push("/signin");
+              }}
+              variant="contained"
+              color="secondary"
+            >
               Sign Out
             </Button>
           </div>
@@ -150,17 +189,37 @@ export function Home() {
                     </Typography>
                   </CardContent>
                   <CardActions>
-                    <Button size="small" color="primary" onClick={() => { history.push("/editor/" + doc._id)}}>
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        history.push("/editor/" + doc._id);
+                      }}
+                    >
                       Edit
                     </Button>
-                    <Button onClick={() => deleteDoc(doc._id).then(response => {
-                      getDocList(user.id).then(result => setData({ docs: result.data }));
-                    })} size="small" color="primary">
+                    <Button
+                      onClick={() =>
+                        deleteDoc(doc._id).then((response) => {
+                          getDocList(user.id).then((result) =>
+                            setData({ docs: result.data })
+                          );
+                        })
+                      }
+                      size="small"
+                      color="primary"
+                    >
                       Delete
-                      </Button>
-                    <Button onClick={() => { handleClickOpen(doc); }} size="small" color="primary">
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        handleClickOpen(doc);
+                      }}
+                      size="small"
+                      color="primary"
+                    >
                       Share
-                      </Button>
+                    </Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -172,11 +231,15 @@ export function Home() {
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>
           Cooper Union
-          </Typography>
+        </Typography>
         <Copyright />
       </footer>
       {/* End footer */}
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+      >
         <DialogTitle id="form-dialog-title">Share Document</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -197,14 +260,17 @@ export function Home() {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={() => {
-            if (shareEmail === "" || selectedDoc == null) return;
-            console.log(shareEmail);
-            console.log(selectedDoc);
-            shareDoc(shareEmail, selectedDoc._id)
-            setShareEmail("");
-            handleClose();
-          }} color="primary">
+          <Button
+            onClick={() => {
+              if (shareEmail === "" || selectedDoc == null) return;
+              console.log(shareEmail);
+              console.log(selectedDoc);
+              shareDoc(shareEmail, selectedDoc._id);
+              setShareEmail("");
+              handleClose();
+            }}
+            color="primary"
+          >
             Share
           </Button>
         </DialogActions>
@@ -214,4 +280,3 @@ export function Home() {
 }
 
 export default Home;
-
