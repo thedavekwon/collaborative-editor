@@ -116,7 +116,7 @@ Resources:
         - Name: REACT_APP_USER_POOL_ID
           Value: !Ref UserPool
         Essential: true
-        Image: docker.io/thedavekwon/collab_client:latest@sha256:5c550d578e26da2c8ec33084b04ba9a195c1b10a63ccaa36b9d4b5df64901d8c
+        Image: docker.io/thedavekwon/collab_client:latest@sha256:ef65fb2b4b91188637d8eb439bac335baee0c16c109a1aa0bd53ae3465c55e34
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -481,7 +481,7 @@ Resources:
         - Name: MONGO_ADDR
           Value: mongo
         Essential: true
-        Image: docker.io/thedavekwon/collab_server:latest@sha256:81dfce180a12e78d0787a0d04955c28bd2ff6efbba6bc103cc8b6bcfc6e1a8b3
+        Image: docker.io/thedavekwon/collab_server:latest@sha256:173ba31babd4ec9a1c212ea2100e42befa6099b754b4d6cd30f5567b8ed81e26
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
